@@ -510,18 +510,18 @@ def test_main(
             t, notify_t = bench_kineto(
                 lambda: buffer.combine(**tune_args), ("combine", "notify")
             )
+            if t < best_time:
+                best_time, best_results = t, (
+                    num_sms,
+                    nvl_chunk_size,
+                    rdma_chunk_size,
+                    notify_t,
+                )
             if local_rank == 0:
                 print(
                     f"[tuning] SMs {num_sms}, NVL chunk {nvl_chunk_size}, RDMA chunk {rdma_chunk_size}, transmit: {t * 1e6:.2f} us, notify: {notify_t * 1e6:.2f} us, BW: {combine_bf16_rdma_recv_bytes / 1e9 / t:.2f} GB/s (RDMA), {combine_bf16_nvl_send_bytes / 1e9 / t:.2f} GB/s (NVL) ",
                     flush=True,
                 )
-                if t < best_time:
-                    best_time, best_results = t, (
-                        num_sms,
-                        nvl_chunk_size,
-                        rdma_chunk_size,
-                        notify_t,
-                    )
 
     if local_rank == 0:
         print(
